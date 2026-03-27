@@ -1,105 +1,97 @@
 # glm-plan-usage
 
-[简体中文](README.md) | English
+简体中文 | [English](README_en.md)
 
-A Claude Code plugin that displays GLM (ZHIPU/ZAI) coding plan usage statistics in the status bar.
+A Claude Code status bar plugin that displays real-time GLM (ZHIPU/ZAI) coding plan usage statistics.
+
+Forked from [jukanntenn/glm-plan-usage](https://github.com/jukanntenn/glm-plan-usage) with additional features including call count, token consumption, and weekly quota display.
 
 ![demo](screenshots/demo.png)
 
 ## Features
 
-- 📊 **Real-time Usage Tracking**: Display Token and MCP usage percentages
-- 🎨 **Color-coded Warnings**: Green (0-79%), Yellow (80-94%), Red (95-100%)
-- ⚡ **Smart Caching**: 5-minute cache to reduce API calls
-- 🔍 **Auto Platform Detection**: Supports ZAI and ZHIPU platforms
-- 🌍 **Cross-platform Support**: Works on Windows, macOS, and Linux
+- **Real-time Usage Tracking**: 5-hour Token quota usage percentage with reset time
+- **Call Count Statistics**: Model call count within the 5-hour window vs plan limit
+- **Token Consumption**: Total token usage within the 5-hour window (smart K/M formatting)
+- **Weekly Quota Support**: Auto-detect and display weekly quota (available on some plans)
+- **MCP Quota Display**: 30-day MCP tool call count
+- **Color-coded Warnings**: Green (0-79%), Yellow (80-94%), Red (95-100%)
+- **Auto Platform Detection**: Supports ZHIPU (bigmodel.cn) and ZAI (api.z.ai) with automatic timezone adaptation
+- **Smart Model Filtering**: Automatically hides usage info when using non-GLM models
+- **Smart Caching**: 2-minute cache to reduce API calls
+- **Cross-platform Support**: Works on Windows, macOS, and Linux
+
+## Status Bar Display
+
+### Old Plan (no weekly quota)
+
+```
+🪙 5% (⏰ 23:00) · 📊 93/9000 · 🌐 0/1000 · ⚡ 3.38M
+```
+
+### New Plan (with weekly quota)
+
+```
+🪙 5% (⏰ 23:00) · 📊 93/6000 · 📅 300/30000 · 🌐 0/1000 · ⚡ 3.38M
+```
+
+### Legend
+
+| Icon | Meaning | Description |
+|------|---------|-------------|
+| 🪙 | 5-hour Token Quota | Usage percentage + reset time |
+| 📊 | 5-hour Call Count | Current calls / plan limit |
+| 📅 | Weekly Quota (new plan) | Current used / plan limit |
+| 🌐 | MCP Quota | 30-day tool call count |
+| ⚡ | Token Consumption | Total tokens used in 5-hour window |
+
+### Quota Reference Table
+
+#### Old Plan
+
+| Plan | 5-hour Call Limit |
+|------|-------------------|
+| Lite | 1,800 |
+| Pro | 9,000 |
+| Max | 36,000 |
+
+#### New Plan
+
+| Plan | 5-hour Call Limit | Weekly Limit |
+|------|-------------------|--------------|
+| Lite | 1,200 | 6,000 |
+| Pro | 6,000 | 30,000 |
+| Max | 24,000 | 120,000 |
 
 ## Installation
-
-### Install via npm (Recommended)
-
-```bash
-npm install -g @jukanntenn/glm-plan-usage
-```
-
-For users experiencing network issues, use npm mirror for faster installation:
-
-```bash
-npm install -g @jukanntenn/glm-plan-usage --registry https://registry.npmmirror.com
-```
-
-Update:
-
-```bash
-npm update -g @jukanntenn/glm-plan-usage
-```
-
-<details>
-<summary>Manual Installation (click to expand)</summary>
-
-Or download manually from [Releases](https://github.com/jukanntenn/glm-plan-usage/releases):
-
-#### Linux
-
-#### Option 1: Dynamically Linked (Recommended)
-```bash
-mkdir -p ~/.claude/glm-plan-usage
-wget https://github.com/jukanntenn/glm-plan-usage/releases/latest/download/glm-plan-usage-linux-x64.tar.gz
-tar -xzf glm-plan-usage-linux-x64.tar.gz
-cp glm-plan-usage ~/.claude/glm-plan-usage/
-chmod +x ~/.claude/glm-plan-usage/glm-plan-usage
-```
-*System requirements: Ubuntu 22.04+, CentOS 9+, Debian 11+, RHEL 9+ (glibc 2.35+)*
-
-#### Option 2: Statically Linked (Universal Compatibility)
-```bash
-mkdir -p ~/.claude/glm-plan-usage
-wget https://github.com/jukanntenn/glm-plan-usage/releases/latest/download/glm-plan-usage-linux-x64-musl.tar.gz
-tar -xzf glm-plan-usage-linux-x64-musl.tar.gz
-cp glm-plan-usage ~/.claude/glm-plan-usage/
-chmod +x ~/.claude/glm-plan-usage/glm-plan-usage
-```
-*Works on any Linux distribution (statically linked, no dependencies)*
-
-#### macOS (Intel)
-
-```bash
-mkdir -p ~/.claude/glm-plan-usage
-wget https://github.com/jukanntenn/glm-plan-usage/releases/latest/download/glm-plan-usage-macos-x64.tar.gz
-tar -xzf glm-plan-usage-macos-x64.tar.gz
-cp glm-plan-usage ~/.claude/glm-plan-usage/
-chmod +x ~/.claude/glm-plan-usage/glm-plan-usage
-```
-
-#### macOS (Apple Silicon)
-
-```bash
-mkdir -p ~/.claude/glm-plan-usage
-wget https://github.com/jukanntenn/glm-plan-usage/releases/latest/download/glm-plan-usage-macos-arm64.tar.gz
-tar -xzf glm-plan-usage-macos-arm64.tar.gz
-cp glm-plan-usage ~/.claude/glm-plan-usage/
-chmod +x ~/.claude/glm-plan-usage/glm-plan-usage
-```
-
-#### Windows
-
-```powershell
-# Create directory and download
-New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\glm-plan-usage"
-Invoke-WebRequest -Uri "https://github.com/jukanntenn/glm-plan-usage/releases/latest/download/glm-plan-usage-windows-x64.zip" -OutFile "glm-plan-usage-windows-x64.zip"
-Expand-Archive -Path "glm-plan-usage-windows-x64.zip" -DestinationPath "."
-Move-Item "glm-plan-usage.exe" "$env:USERPROFILE\.claude\glm-plan-usage\"
-```
-
-</details>
 
 ### Build from Source
 
 ```bash
-git clone https://github.com/jukanntenn/glm-plan-usage.git
-cd glm-plan-usage
+git clone https://github.com/zwen64657/glm-plan-usage2.git
+cd glm-plan-usage2
 cargo build --release
+```
+
+The compiled binary is at `target/release/glm-plan-usage` (Windows: `glm-plan-usage.exe`).
+
+### Manual Installation
+
+Copy the binary to Claude Code's plugin directory:
+
+**Linux/macOS:**
+
+```bash
+mkdir -p ~/.claude/glm-plan-usage
 cp target/release/glm-plan-usage ~/.claude/glm-plan-usage/
+chmod +x ~/.claude/glm-plan-usage/glm-plan-usage
+```
+
+**Windows:**
+
+```powershell
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\glm-plan-usage"
+Copy-Item target\release\glm-plan-usage.exe "$env:USERPROFILE\.claude\glm-plan-usage\"
 ```
 
 ## Configuration
@@ -130,143 +122,58 @@ Add to your Claude Code `settings.json`:
 }
 ```
 
-Restart Claude Code, the status bar will display:
+Restart Claude Code. The plugin automatically reads `ANTHROPIC_AUTH_TOKEN` and `ANTHROPIC_BASE_URL` from Claude Code — no extra configuration needed.
 
-```text
-🪙 32% (⌛️ 1:44) · 🌐 20/100
-   │  │           │     └─ MCP usage (used/total)
-   │  │           └─ Separator
-   │  └─ Token countdown (hours:minutes)
-   └─ Token usage percentage
+### Supported Platforms
 
-```
+| Platform | BASE_URL | Timezone |
+|----------|----------|----------|
+| ZHIPU | `https://open.bigmodel.cn/api/anthropic` | Beijing Time (UTC+8) |
+| ZAI | `https://api.z.ai/...` | UTC |
 
-If you are already using [CCometixLine](https://github.com/Haleclipse/CCometixLine) or other similar plugins, you can create scripts to combine them:
+The plugin auto-detects the platform from `ANTHROPIC_BASE_URL` and adapts the timezone accordingly.
 
-**Linux/macOS:**
+## Combining with Other Status Bar Plugins
 
-`~/.claude/status-line-combined.sh` script example:
+If you're already using [CCometixLine](https://github.com/Haleclipse/CCometixLine) or similar plugins, create a combined script:
+
+**Linux/macOS:** `~/.claude/status-line-combined.sh`
 
 ```bash
 #!/bin/bash
-
-# Read JSON input from stdin
 INPUT=$(cat)
-
-# Run both commands with the same input
 CCLINE_OUTPUT=$(echo "$INPUT" | ~/.claude/ccline/ccline 2>/dev/null)
 GLM_OUTPUT=$(echo "$INPUT" | ~/.claude/glm-plan-usage/glm-plan-usage 2>/dev/null)
 
-# Build combined output
 OUTPUT=""
-
-# Add ccline output if available
-if [ -n "$CCLINE_OUTPUT" ]; then
-    OUTPUT="$CCLINE_OUTPUT"
-fi
-
-# Add glm-plan-usage output if available
+[ -n "$CCLINE_OUTPUT" ] && OUTPUT="$CCLINE_OUTPUT"
 if [ -n "$GLM_OUTPUT" ]; then
-    if [ -n "$OUTPUT" ]; then
-        OUTPUT="$OUTPUT | $GLM_OUTPUT"
-    else
-        OUTPUT="$GLM_OUTPUT"
-    fi
+    [ -n "$OUTPUT" ] && OUTPUT="$OUTPUT | $GLM_OUTPUT" || OUTPUT="$GLM_OUTPUT"
 fi
-
-# Print combined output
-if [ -n "$OUTPUT" ]; then
-    printf "%s" "$OUTPUT"
-fi
+[ -n "$OUTPUT" ] && printf "%s" "$OUTPUT"
 ```
 
-Add execution permission: `chmod +x ~/.claude/status-line-combined.sh`
-
-Configure in Claude Code `settings.json`:
-
-```json
-{
-  "statusLine": {
-    "type": "command",
-    "command": "~/.claude/status-line-combined.sh",
-    "padding": 0
-  }
-}
+```bash
+chmod +x ~/.claude/status-line-combined.sh
 ```
 
-**Windows (PowerShell):**
-
-`%USERPROFILE%\.claude\status-line-combined.ps1` script example:
+**Windows (PowerShell):** `%USERPROFILE%\.claude\status-line-combined.ps1`
 
 ```powershell
-# Read JSON input from stdin
 $InputString = [Console]::In.ReadToEnd()
-
-# Run both commands with the same input
 $CclineOutput = $InputString | & "$env:USERPROFILE\.claude\ccline\ccline.exe" 2>$null
 $GlmOutput = $InputString | & "$env:USERPROFILE\.claude\glm-plan-usage\glm-plan-usage.exe" 2>$null
 
-# Build combined output
 $Output = ""
-
-# Add ccline output if available
-if (-not [string]::IsNullOrEmpty($CclineOutput)) {
-    $Output = $CclineOutput
-}
-
-# Add glm-plan-usage output if available
+if (-not [string]::IsNullOrEmpty($CclineOutput)) { $Output = $CclineOutput }
 if (-not [string]::IsNullOrEmpty($GlmOutput)) {
-    if (-not [string]::IsNullOrEmpty($Output)) {
-        $Output = "$Output | $GlmOutput"
-    } else {
-        $Output = $GlmOutput
-    }
+    if (-not [string]::IsNullOrEmpty($Output)) { $Output = "$Output | $GlmOutput" }
+    else { $Output = $GlmOutput }
 }
-
-# Print combined output
-if (-not [string]::IsNullOrEmpty($Output)) {
-    Write-Host -NoNewline $Output
-}
+if (-not [string]::IsNullOrEmpty($Output)) { Write-Host -NoNewline $Output }
 ```
 
-Grant script execution permission in PowerShell: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
-
-Configure in Claude Code `settings.json`:
-
-```json
-{
-  "statusLine": {
-    "type": "command",
-    "command": "powershell.exe -File %USERPROFILE%\\.claude\\status-line-combined.ps1",
-    "padding": 0
-  }
-}
-```
-
-## Environment Variables
-
-**Note:** These variables are typically already configured in your Claude Code `settings.json`. If not, you can set them manually:
-
-**Linux/macOS:**
-
-```bash
-export ANTHROPIC_AUTH_TOKEN="your-token-here"
-export ANTHROPIC_BASE_URL="https://open.bigmodel.cn/api/anthropic"
-```
-
-**Windows (Command Prompt):**
-
-```cmd
-set ANTHROPIC_AUTH_TOKEN=your-token-here
-set ANTHROPIC_BASE_URL=https://open.bigmodel.cn/api/anthropic
-```
-
-**Windows (PowerShell):**
-
-```powershell
-$env:ANTHROPIC_AUTH_TOKEN="your-token-here"
-$env:ANTHROPIC_BASE_URL="https://open.bigmodel.cn/api/anthropic"
-```
+Then point your `settings.json` to the combined script.
 
 ## License
 
